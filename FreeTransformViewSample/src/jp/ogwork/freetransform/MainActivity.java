@@ -2,9 +2,9 @@ package jp.ogwork.freetransform;
 
 import static android.content.Intent.ACTION_PICK;
 import static android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+import jp.ogwork.freetransform.view.GestureImageView;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,22 +13,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback.EmptyCallback;
 import com.squareup.picasso.Picasso;
-
-import jp.ogwork.freetransform.R;
-import jp.ogwork.freetransform.view.GestureImageView;
 
 public class MainActivity extends Activity {
 
     public static final String TAG = MainActivity.class.getName();
 
     private static final int GALLERY_REQUEST = 9391;
-
-    private ContentResolver cr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +63,7 @@ public class MainActivity extends Activity {
         private GestureImageView imageView;
 
         private ImageView ivThumbnail1;
-        
+
         public PlaceholderFragment() {
         }
 
@@ -84,18 +78,6 @@ public class MainActivity extends Activity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             imageView = (GestureImageView) rootView.findViewById(R.id.image);
-
-            final View view = rootView.findViewById(R.id.fl_gesture);
-
-            view.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
-
-                @SuppressWarnings("deprecation")
-                @Override
-                public void onGlobalLayout() {
-                    imageView.setParentViewWidthHeight(view.getWidth(), view.getHeight());
-                    view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                }
-            });
 
             ivThumbnail1 = (ImageView) rootView.findViewById(R.id.iv_thumnail_1);
             ivThumbnail1.setOnClickListener(new OnClickListener() {
