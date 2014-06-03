@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import jp.ogwork.freetransform.R;
-import jp.ogwork.gesturetransformableview.view.GestureTransformImageView;
+import jp.ogwork.gesturetransformableview.view.GestureTransformableImageView;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -28,10 +28,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -51,7 +51,7 @@ public class MainFragment extends Fragment {
 
     private static final String SAVED_CAPTURE_IMAGE_NAME = "capture.png";
 
-    private ArrayList<GestureTransformImageView> imageViewList = new ArrayList<GestureTransformImageView>();
+    private ArrayList<GestureTransformableImageView> imageViewList = new ArrayList<GestureTransformableImageView>();
 
     private Button btnAddView;
 
@@ -115,7 +115,7 @@ public class MainFragment extends Fragment {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 String imageUri = data.getData().toString();
 
-                GestureTransformImageView iv = createGestureImageView();
+                GestureTransformableImageView iv = createGestureImageView();
 
                 if (iv != null) {
                     loadImagePicasso(imageUri, iv);
@@ -151,9 +151,9 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private GestureTransformImageView createGestureImageView() {
+    private GestureTransformableImageView createGestureImageView() {
 
-        GestureTransformImageView gestureImageView = new GestureTransformImageView(getActivity());
+        GestureTransformableImageView gestureImageView = new GestureTransformableImageView(getActivity());
         LayoutParams params = new LayoutParams(IMAGE_VIEW_WIDTH, IMAGE_VIEW_HEIGHT);
         gestureImageView.setLayoutParams(params);
         gestureImageView.setScaleType(ScaleType.CENTER_CROP);
