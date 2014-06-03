@@ -1,0 +1,112 @@
+package jp.ogwork.gesturetransformableview.gesture;
+
+import android.util.Log;
+import android.view.MotionEvent;
+
+public class PinchGestureDetector {
+
+    public static final String TAG = PinchGestureDetector.class.getName();
+
+    private float scale = 1.0f;
+
+    private float distance;
+
+    private float preDistance;
+
+    private PinchGestureListener pinchGestureListener;
+
+    public interface PinchGestureListener {
+        void onPinchGestureListener(PinchGestureDetector dragGestureDetector);
+    }
+
+    public PinchGestureDetector(PinchGestureListener dragGestureListener) {
+        this.pinchGestureListener = dragGestureListener;
+    }
+
+    public float getScale() {
+        return this.scale;
+    }
+
+    public float getDistance() {
+        return this.distance;
+    }
+
+    public float getPreDistance() {
+        return this.preDistance;
+    }
+
+    synchronized public boolean onTouchEvent(MotionEvent event) {
+
+        float eventX = event.getX() * scale;
+        float eventY = event.getY() * scale;
+        int count = event.getPointerCount();
+
+        int action = event.getAction() & MotionEvent.ACTION_MASK;
+        int actionPointerIndex = event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK;
+
+        // Log.d(TAG, "MotionEvent : " + action + " eventX : " + eventX +
+        // " eventY : " + eventY + " count : " + count);
+
+        switch (action) {
+        case MotionEvent.ACTION_DOWN: {
+
+            /** 最初のpointしか来ない */
+
+            break;
+        }
+        case MotionEvent.ACTION_MOVE: {
+
+            if (count == 2) {
+
+                float multiTouchX = event.getX(1) * scale;
+                float multiTouchY = event.getY(1) * scale;
+
+                Log.d(TAG, "multiTouchX : " + multiTouchX + " multiTouchY : " + multiTouchY + " scale : " + scale);
+
+                distance = culcDistance(eventX, eventY, multiTouchX, multiTouchY);
+                Log.d(TAG, "distance : " + distance + " preDistance : " + preDistance);
+                pinchGestureListener.onPinchGestureListener(this);
+                scale *= distance / preDistance;
+                preDistance = distance;
+
+            }
+
+            break;
+        }
+        case MotionEvent.ACTION_POINTER_DOWN: {
+
+            /** 2本の位置を記録　以後、moveにて距離の差分を算出 */
+
+            if (count == 2) {
+                int downId = actionPointerIndex >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+
+                float multiTouchX = event.getX(downId) * scale;
+                float multiTouchY = event.getY(downId) * scale;
+
+                distance = culcDistance(eventX, eventY, multiTouchX, multiTouchY);
+                pinchGestureListener.onPinchGestureListener(this);
+                preDistance = distance;
+            }
+
+            break;
+        }
+        case MotionEvent.ACTION_POINTER_UP: {
+
+            distance = 0;
+            preDistance = 0;
+            scale = 1.0f;
+
+            break;
+        }
+
+        default:
+        }
+        return false;
+    }
+
+    private float culcDistance(float x1, float y1, float x2, float y2) {
+        final float dx = x1 - x2;
+        final float dy = y1 - y2;
+        return (float) Math.sqrt(dx * dx + dy * dy);
+    }
+}
