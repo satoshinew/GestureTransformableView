@@ -5,18 +5,17 @@
     tools:context="jp.ogwork.freetransform.MainActivity$PlaceholderFragment" >
 
     <RelativeLayout
-        android:id="@+id/fl_gesture"
+        android:id="@+id/rl_gesture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/ll_thumbnail" >
 
-        <jp.ogwork.freetransform.view.GestureImageView
-            android:id="@+id/image"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_centerInParent="true"
-            android:background="@drawable/ic_launcher"
+        <ImageView
+            android:id="@+id/iv_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:scaleType="centerCrop" />
+
     </RelativeLayout>
 
     <LinearLayout
@@ -27,40 +26,24 @@
         android:layout_centerHorizontal="true"
         android:gravity="center" >
 
-        <ImageView
-            android:id="@+id/iv_thumnail_1"
+        <Button
+            android:id="@+id/btn_add_bg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:src="@drawable/nikaidou" />
+            android:text="AddBackground" />
 
-        <ImageView
-            android:id="@+id/iv_thumnail_2"
+        <Button
+            android:id="@+id/btn_add_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:src="@drawable/nikaidou" />
+            android:text="Add view" />
 
-        <ImageView
-            android:id="@+id/iv_thumnail_3"
+        <Button
+            android:id="@+id/btn_capture"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:src="@drawable/nikaidou" />
+            android:text="capture" />
 
-        <ImageView
-            android:id="@+id/iv_thumnail_4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:src="@drawable/nikaidou" />
-
-        <ImageView
-            android:id="@+id/iv_thumnail_5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:src="@drawable/nikaidou" />
     </LinearLayout>
 
 </RelativeLayout>
