@@ -153,7 +153,8 @@ public class MainFragment extends Fragment {
 
     private GestureTransformableImageView createGestureImageView() {
 
-        GestureTransformableImageView gestureImageView = new GestureTransformableImageView(getActivity());
+        GestureTransformableImageView gestureImageView = new GestureTransformableImageView(getActivity(),
+                GestureTransformableImageView.GESTURE_DRAGGABLE | GestureTransformableImageView.GESTURE_ROTATABLE);
         LayoutParams params = new LayoutParams(IMAGE_VIEW_WIDTH, IMAGE_VIEW_HEIGHT);
         gestureImageView.setLayoutParams(params);
         gestureImageView.setScaleType(ScaleType.CENTER_CROP);

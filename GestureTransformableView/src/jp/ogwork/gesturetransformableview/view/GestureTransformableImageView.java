@@ -6,19 +6,21 @@ import jp.ogwork.gesturetransformableview.gesture.PinchGestureDetector;
 import jp.ogwork.gesturetransformableview.gesture.PinchGestureDetector.PinchGestureListener;
 import jp.ogwork.gesturetransformableview.gesture.RotateGestureDetector;
 import jp.ogwork.gesturetransformableview.gesture.RotateGestureDetector.RotateGestureListener;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
 public class GestureTransformableImageView extends ImageView implements OnTouchListener {
+
+    public static final int GESTURE_DRAGGABLE = 0x0001;
+
+    public static final int GESTURE_ROTATABLE = 0x0002;
+
+    public static final int GESTURE_SCALABLE = 0x0004;
 
     public static final String TAG = GestureTransformableImageView.class.getName();
 
@@ -34,8 +36,6 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
 
     private RotateGestureDetector rotateGestureDetector;
 
-    private ScaleGestureDetector scaleGestureDetector;
-
     private DragGestureDetector dragGestureDetector;
 
     private PinchGestureDetector pinchGestureDetector;
@@ -44,17 +44,22 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
 
     public GestureTransformableImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(context);
+        init(context, GESTURE_DRAGGABLE | GESTURE_ROTATABLE | GESTURE_SCALABLE);
     }
 
     public GestureTransformableImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(context, GESTURE_DRAGGABLE | GESTURE_ROTATABLE | GESTURE_SCALABLE);
     }
 
     public GestureTransformableImageView(Context context) {
         super(context);
-        init(context);
+        init(context, GESTURE_DRAGGABLE | GESTURE_ROTATABLE | GESTURE_SCALABLE);
+    }
+
+    public GestureTransformableImageView(Context context, int gestureFlag) {
+        super(context);
+        init(context, gestureFlag);
     }
 
     public void setLimitScaleMax(float limit) {
@@ -68,45 +73,34 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
-        // scaleGestureDetector.onTouchEvent(event);
-        rotateGestureDetector.onTouchEvent(event);
-        dragGestureDetector.onTouchEvent(event);
-        pinchGestureDetector.onTouchEvent(event);
+        if (rotateGestureDetector != null) {
+            rotateGestureDetector.onTouchEvent(event);
+        }
+
+        if (dragGestureDetector != null) {
+            dragGestureDetector.onTouchEvent(event);
+        }
+
+        if (pinchGestureDetector != null) {
+            pinchGestureDetector.onTouchEvent(event);
+        }
 
         return true;
     }
 
-    @SuppressLint("NewApi")
-    private void init(Context context) {
+    private void init(Context context, int gestureFlag) {
 
         setOnTouchListener(this);
 
-        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-            scaleGestureDetector.setQuickScaleEnabled(false);
+        if ((gestureFlag & GESTURE_DRAGGABLE) == GESTURE_DRAGGABLE) {
+            dragGestureDetector = new DragGestureDetector(new DragListener());
         }
-        rotateGestureDetector = new RotateGestureDetector(new RotateListener());
-        dragGestureDetector = new DragGestureDetector(new DragListener());
-
-        pinchGestureDetector = new PinchGestureDetector(new PinchGestureListener() {
-
-            @Override
-            public void onPinchGestureListener(final PinchGestureDetector dragGestureDtector) {
-
-                float scale = dragGestureDtector.getDistance() / dragGestureDtector.getPreDistance();
-                float tmpScale = scaleFactor * scale;
-
-                if (limitScaleMin <= tmpScale && tmpScale <= limitScaleMax) {
-                    scaleFactor = tmpScale;
-                    setScaleX(scaleFactor);
-                    setScaleY(scaleFactor);
-
-                    return;
-                }
-
-                return;
-            }
-        });
+        if ((gestureFlag & GESTURE_ROTATABLE) == GESTURE_ROTATABLE) {
+            rotateGestureDetector = new RotateGestureDetector(new RotateListener());
+        }
+        if ((gestureFlag & GESTURE_SCALABLE) == GESTURE_SCALABLE) {
+            pinchGestureDetector = new PinchGestureDetector(new ScaleListener());
+        }
 
     }
 
@@ -123,35 +117,22 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
         return new PointF(resultX, resultY);
     }
 
-    private class ScaleListener extends SimpleOnScaleGestureListener {
+    private class ScaleListener implements PinchGestureListener {
 
         @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            return super.onScaleBegin(detector);
-        }
+        public void onPinchGestureListener(PinchGestureDetector dragGestureDetector) {
 
-        @Override
-        synchronized public boolean onScale(ScaleGestureDetector detector) {
-
-            Log.d(TAG, "scaleFactor : " + scaleFactor);
-
-            float scale = detector.getCurrentSpan() / detector.getPreviousSpan();
+            float scale = dragGestureDetector.getDistance() / dragGestureDetector.getPreDistance();
             float tmpScale = scaleFactor * scale;
 
             if (limitScaleMin <= tmpScale && tmpScale <= limitScaleMax) {
                 scaleFactor = tmpScale;
                 setScaleX(scaleFactor);
                 setScaleY(scaleFactor);
-                return false;
-            } else {
-                super.onScale(detector);
-            }
-            return true;
-        }
 
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            super.onScaleEnd(detector);
+                return;
+            }
+
         }
     }
 
