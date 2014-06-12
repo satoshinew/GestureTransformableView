@@ -1,6 +1,5 @@
 package jp.ogwork.gesturetransformableview.gesture;
 
-import android.util.Log;
 import android.view.MotionEvent;
 
 public class PinchGestureDetector {
@@ -44,9 +43,6 @@ public class PinchGestureDetector {
         int action = event.getAction() & MotionEvent.ACTION_MASK;
         int actionPointerIndex = event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK;
 
-        // Log.d(TAG, "MotionEvent : " + action + " eventX : " + eventX +
-        // " eventY : " + eventY + " count : " + count);
-
         switch (action) {
         case MotionEvent.ACTION_DOWN: {
 
@@ -61,10 +57,7 @@ public class PinchGestureDetector {
                 float multiTouchX = event.getX(1) * scale;
                 float multiTouchY = event.getY(1) * scale;
 
-                Log.d(TAG, "multiTouchX : " + multiTouchX + " multiTouchY : " + multiTouchY + " scale : " + scale);
-
                 distance = culcDistance(eventX, eventY, multiTouchX, multiTouchY);
-                Log.d(TAG, "distance : " + distance + " preDistance : " + preDistance);
                 pinchGestureListener.onPinchGestureListener(this);
                 scale *= distance / preDistance;
                 preDistance = distance;

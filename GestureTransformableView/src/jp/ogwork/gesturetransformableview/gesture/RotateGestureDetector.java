@@ -4,7 +4,7 @@ import android.view.MotionEvent;
 
 public class RotateGestureDetector {
 
-    public final int SLOPE_0 = 10000;
+    public final static int SLOPE_0 = 10000;
 
     private RotateGestureListener rotationGestureListener;
 
@@ -95,7 +95,7 @@ public class RotateGestureDetector {
         return angle;
     }
 
-    private float getAngle(float xi1, float yi1, float xm1, float ym1, float xi2, float yi2, float xm2, float ym2) {
+    private static float getAngle(float xi1, float yi1, float xm1, float ym1, float xi2, float yi2, float xm2, float ym2) {
 
         // 2本の直線の傾き・y切片を算出
         float firstLinearSlope;
@@ -104,7 +104,6 @@ public class RotateGestureDetector {
         } else {
             return SLOPE_0;
         }
-        // float firstLinearSection = yi1 - firstLinearSlope * xi1;
 
         float secondLinearSlope = (xm2 - xi2) / (ym2 - yi2);
         if ((xm2 - xi2) != 0 && (ym2 - yi2) != 0) {
@@ -112,8 +111,6 @@ public class RotateGestureDetector {
         } else {
             return SLOPE_0;
         }
-
-        // float secondLinearSection = yi2 - secondLinearSlope * xi2;
 
         if (firstLinearSlope * secondLinearSlope == -1) {
             return 90.0f;

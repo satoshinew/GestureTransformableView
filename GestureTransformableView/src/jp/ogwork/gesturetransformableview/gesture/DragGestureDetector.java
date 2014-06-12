@@ -39,14 +39,15 @@ public class DragGestureDetector {
 
     synchronized public boolean onTouchEvent(MotionEvent event) {
 
-        float eventX = event.getX();
-        float eventY = event.getY();
-        int count = event.getPointerCount();
+        if (event.getPointerCount() >= 3) {
+            return false;
+        }
+
+        float eventX = event.getX(originalIndex);
+        float eventY = event.getY(originalIndex);
 
         int action = event.getAction() & MotionEvent.ACTION_MASK;
         int actionPointer = event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK;
-
-        Log.d(TAG, "MotionEvent : " + action + " eventX : " + eventX + " eventY : " + eventY + " count : " + count);
 
         switch (action) {
         case MotionEvent.ACTION_DOWN: {
@@ -63,7 +64,6 @@ public class DragGestureDetector {
 
             originalIndex = 0;
 
-            Log.d(TAG, "ACTION_DOWN : downPoint.x " + downPoint.x + " downPoint.y : " + downPoint.y);
             break;
         }
         case MotionEvent.ACTION_MOVE: {
@@ -72,11 +72,6 @@ public class DragGestureDetector {
             if (originalPoint != null) {
                 deltaX = eventX - originalPoint.x;
                 deltaY = eventY - originalPoint.y;
-
-                Log.d(TAG, "ACTION_MOVE originalPoint.x : " + originalPoint.x + " originalPoint.y : " + originalPoint.y
-                        + " originalIndex : " + originalIndex);
-                Log.d(TAG, "ACTION_MOVE eventX : " + eventX + " eventY : " + eventY + " deltaX : " + deltaX + " deltaY"
-                        + deltaY);
 
                 if (dragGestureListener != null) {// && (count < 2)) {
                     dragGestureListener.onDragGestureListener(this);
@@ -88,7 +83,6 @@ public class DragGestureDetector {
         case MotionEvent.ACTION_POINTER_DOWN: {
 
             int downId = actionPointer >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-            Log.d(TAG, "ACTION_POINTER_DOWN id : " + downId);
 
             float multiTouchX = event.getX(downId);
             float multiTouchY = event.getY(downId);
@@ -102,8 +96,6 @@ public class DragGestureDetector {
                 pointMap.put(downId, createPoint(multiTouchX, multiTouchY));
             }
 
-            // secondX = event.getX(downId);
-            // secondY = event.getY(downId);
             break;
         }
         case MotionEvent.ACTION_POINTER_UP: {
@@ -112,6 +104,7 @@ public class DragGestureDetector {
             Log.d(TAG, "ACTION_POINTER_UP id : " + upId);
 
             if (originalIndex == upId) {
+                Log.d(TAG, "ACTION_POINTER_UP orig up");
                 /** 起点の指が離れた */
                 pointMap.remove(upId);
 
@@ -126,7 +119,6 @@ public class DragGestureDetector {
                         }
                     }
                 }
-
             }
 
             break;
