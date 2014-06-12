@@ -1,5 +1,11 @@
 package jp.ogwork.gesturetransformableview.view;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import jp.ogwork.gesturetransformableview.gesture.DragGestureDetector;
 import jp.ogwork.gesturetransformableview.gesture.DragGestureDetector.DragGestureListener;
 import jp.ogwork.gesturetransformableview.gesture.PinchGestureDetector;
@@ -15,6 +21,12 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
 public class GestureTransformableImageView extends ImageView implements OnTouchListener {
+
+    static {
+//        System.loadLibrary("GestureTransformableView");
+    }
+
+    public static native float[] nativeRotateXY(float centerX, float centerY, float angle, float x, float y);
 
     public static final int GESTURE_DRAGGABLE = 0x0001;
 
@@ -45,16 +57,20 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
     public GestureTransformableImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context, GESTURE_DRAGGABLE | GESTURE_ROTATABLE | GESTURE_SCALABLE);
+        loadLibrary(context);
     }
 
     public GestureTransformableImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, GESTURE_DRAGGABLE | GESTURE_ROTATABLE | GESTURE_SCALABLE);
+        loadLibrary(context);
     }
 
     public GestureTransformableImageView(Context context) {
         super(context);
         init(context, GESTURE_DRAGGABLE | GESTURE_ROTATABLE | GESTURE_SCALABLE);
+
+        loadLibrary(context);
     }
 
     public GestureTransformableImageView(Context context, int gestureFlag) {
@@ -104,7 +120,31 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
 
     }
 
-    private PointF rotateXY(float centerX, float centerY, float angle, float x, float y) {
+    private void loadLibrary(Context context) {
+        String path = "/data/data/jp.ogwork.gesturetransformableview.gesture/libGestureTransformableView.so";
+        InputStream is;
+        try {
+            is = context.getResources().getAssets().open("libGestureTransformableView.so");
+            File fileout = new File(path);
+            OutputStream os = new FileOutputStream(fileout);
+            final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int n = 0;
+            while (-1 != (n = is.read(buffer))) {
+                os.write(buffer, 0, n);
+            }
+            is.close();
+            os.close();
+            System.load(fileout.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static PointF rotateXY(float centerX, float centerY, float angle, float x, float y) {
+        /** unused. instead nativeRotateXY() */
 
         float resultX = 0;
         float resultY = 0;
@@ -163,13 +203,10 @@ public class GestureTransformableImageView extends ImageView implements OnTouchL
 
             float dx = dragGestureDetector.getDeltaX();
             float dy = dragGestureDetector.getDeltaY();
-            PointF pf = rotateXY(0, 0, angle, dx, dy);
+            float[] rotatedPoints = nativeRotateXY(0, 0, angle, dx, dy);
 
-            dx = pf.x;
-            dy = pf.y;
-
-            setX(getX() + dx * scaleFactor);
-            setY(getY() + dy * scaleFactor);
+            setX(getX() + rotatedPoints[0] * scaleFactor);
+            setY(getY() + rotatedPoints[1] * scaleFactor);
         }
     }
 }

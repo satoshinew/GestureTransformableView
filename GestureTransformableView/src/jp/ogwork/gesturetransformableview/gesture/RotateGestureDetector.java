@@ -4,7 +4,10 @@ import android.view.MotionEvent;
 
 public class RotateGestureDetector {
 
-    public final int SLOPE_0 = 10000;
+    public static final float SLOPE_0 = Float.MAX_VALUE;
+
+    private static native int nativeGetAngle(float xi1, float yi1, float xm1, float ym1, float xi2, float yi2,
+            float xm2, float ym2, boolean[] isSlopeZero, float[] result);
 
     private RotateGestureListener rotationGestureListener;
 
@@ -50,13 +53,16 @@ public class RotateGestureDetector {
         case MotionEvent.ACTION_MOVE:
 
             if (count >= 2) {
-
+                boolean isSlopeZero[] = new boolean[1];
                 // 回転角度の取得
-                float angle = getAngle(downX, downY, downX2, downY2, eventX, eventY, event.getX(1), event.getY(1));
+                float rotatedAngle[] = new float[1];
+                nativeGetAngle(downX, downY, downX2, downY2, eventX, eventY, event.getX(1), event.getY(1), isSlopeZero,
+                        rotatedAngle);
 
                 // 画像の回転
-                if (angle != SLOPE_0) {
-                    this.angle -= angle * 180d / Math.PI;
+                if (!isSlopeZero[0]) {
+                    // if (angle != SLOPE_0) {
+                    this.angle -= rotatedAngle[0] * 180d / Math.PI;
                 }
 
                 downX2 = event.getX(1);
@@ -95,7 +101,8 @@ public class RotateGestureDetector {
         return angle;
     }
 
-    private float getAngle(float xi1, float yi1, float xm1, float ym1, float xi2, float yi2, float xm2, float ym2) {
+    private static float getAngle(float xi1, float yi1, float xm1, float ym1, float xi2, float yi2, float xm2, float ym2) {
+        /** unused. instead nativeGetAngle() */
 
         // 2本の直線の傾き・y切片を算出
         float firstLinearSlope;
@@ -104,7 +111,6 @@ public class RotateGestureDetector {
         } else {
             return SLOPE_0;
         }
-        // float firstLinearSection = yi1 - firstLinearSlope * xi1;
 
         float secondLinearSlope = (xm2 - xi2) / (ym2 - yi2);
         if ((xm2 - xi2) != 0 && (ym2 - yi2) != 0) {
@@ -112,8 +118,6 @@ public class RotateGestureDetector {
         } else {
             return SLOPE_0;
         }
-
-        // float secondLinearSection = yi2 - secondLinearSlope * xi2;
 
         if (firstLinearSlope * secondLinearSlope == -1) {
             return 90.0f;

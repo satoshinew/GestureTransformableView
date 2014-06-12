@@ -72,10 +72,7 @@ public class MainFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                if (imageViewList != null) {
-                    Intent gallery = new Intent(ACTION_PICK, EXTERNAL_CONTENT_URI);
-                    startActivityForResult(gallery, GALLERY_REQUEST);
-                }
+                intentToGalleryForBackground();
             }
         });
 
@@ -84,8 +81,7 @@ public class MainFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                Intent gallery = new Intent(ACTION_PICK, EXTERNAL_CONTENT_URI);
-                startActivityForResult(gallery, GALLERY_REQUEST_BG);
+                intentToGallery();
             }
         });
 
@@ -94,14 +90,7 @@ public class MainFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
-                Bitmap bitmap = createCaptureBitmap();
-
-                String savePath = Environment.getExternalStorageDirectory().toString() + "/capture/";
-
-                saveBitmap(savePath, SAVED_CAPTURE_IMAGE_NAME, bitmap);
-
-                Toast.makeText(getActivity(), "save at " + savePath + SAVED_CAPTURE_IMAGE_NAME, Toast.LENGTH_LONG)
-                        .show();
+                capture();
             }
         });
         return rootView;
@@ -151,6 +140,31 @@ public class MainFragment extends Fragment {
         }
     }
 
+    private void intentToGallery() {
+        Intent gallery = new Intent(ACTION_PICK, EXTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, GALLERY_REQUEST_BG);
+    }
+
+    private void intentToGalleryForBackground() {
+        if (imageViewList != null) {
+            Intent gallery = new Intent(ACTION_PICK, EXTERNAL_CONTENT_URI);
+            startActivityForResult(gallery, GALLERY_REQUEST);
+        }
+    }
+
+    private void capture() {
+        Bitmap bitmap = createCaptureBitmap();
+
+        String savePath = Environment.getExternalStorageDirectory().toString() + "/capture/";
+
+        saveBitmap(savePath, SAVED_CAPTURE_IMAGE_NAME, bitmap);
+
+        Toast.makeText(getActivity(), "save at " + savePath + SAVED_CAPTURE_IMAGE_NAME, Toast.LENGTH_LONG).show();
+
+        bitmap.recycle();
+        bitmap = null;
+    }
+
     private GestureTransformableImageView createGestureImageView() {
 
         GestureTransformableImageView gestureImageView = new GestureTransformableImageView(getActivity(),
@@ -175,16 +189,12 @@ public class MainFragment extends Fragment {
         return bitmap;
     }
 
-    public static boolean saveBitmap(String dirPath, String fileName, Bitmap data) {
+    private static boolean saveBitmap(String dirPath, String fileName, Bitmap data) {
 
-        // fileパス
         File dirPathFile = new File(dirPath);
-        // ファイル名
         String fileStr = dirPath + "/" + fileName;
-        // file(パス+ファイル名)
         File filePath = new File(dirPathFile, fileName);
 
-        // フォルダ生成
         try {
             /* ディレクトリチェック 無かったら作成 */
             if (!dirPathFile.isDirectory()) {
@@ -195,7 +205,6 @@ public class MainFragment extends Fragment {
             e.printStackTrace();
         }
 
-        // データ生成
         FileOutputStream fos = null;
         try {
 
@@ -230,7 +239,7 @@ public class MainFragment extends Fragment {
         return true;
     }
 
-    public static boolean existsFile(String filePath) {
+    private static boolean existsFile(String filePath) {
         return (new File(filePath)).exists();
     }
 }
